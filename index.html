@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JonhsBet - Jogo dos Copos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #2d3436;
+            color: #dfe6e9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .cups-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .cup {
+            width: 100px;
+            height: 150px;
+            background-color: #636e72;
+            border-radius: 5px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .cup:hover {
+            transform: scale(1.1);
+        }
+        .ball {
+            width: 30px;
+            height: 30px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 20px;
+            display: none;
+        }
+        #startBtn, #shuffleBtn {
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            background-color: #0984e3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #startBtn:hover, #shuffleBtn:hover {
+            background-color: #74b9ff;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+        #balance {
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jogo dos Copos</h1>
+    <div id="balance">Saldo: $100</div>
+    <label for="bet">Escolha sua aposta: </label>
+    <input type="number" id="bet" min="1" value="10" />
+    <button id="shuffleBtn" onclick="shuffleCups()">Embaralhar Copos</button>
+    <div class="cups-container">
+        <div class="cup" onclick="chooseCup(0)"><div class="ball"></div></div>
+        <div class="cup" onclick="chooseCup(1)"><div class="ball"></div></div>
+        <div class="cup" onclick="chooseCup(2)"><div class="ball"></div></div>
+    </div>
+    <button id="startBtn" onclick="startGame()">Começar o Jogo</button>
+    <div id="message"></div>
+
+    <script>
+        let ballPosition = -1;
+        let isGameStarted = false;
+        let balance = 100;
+
+        function updateBalance(amount) {
+            balance += amount;
+            document.getElementById("balance").textContent = `Saldo: $${balance}`;
+        }
+
+        function startGame() {
+            const bet = parseInt(document.getElementById("bet").value);
+            if (bet > balance) {
+                document.getElementById("message").textContent = "Saldo insuficiente para essa aposta!";
+                return;
+            }
+            
+            // Deduz o valor da aposta e inicia o jogo
+            updateBalance(-bet);
+            isGameStarted = true;
+            ballPosition = Math.floor(Math.random() * 3); // Posiciona a bolinha em um copo aleatório
+            document.querySelectorAll('.ball').forEach(ball => ball.style.display = 'none');
+            document.getElementById("message").textContent = "Escolha um copo!";
+        }
+
+        function chooseCup(selectedCup) {
+            if (!isGameStarted) {
+                document.getElementById("message").textContent = "Clique em 'Começar o Jogo' para jogar!";
+                return;
+            }
+
+            isGameStarted = false;
+            const bet = parseInt(document.getElementById("bet").value);
+            const cups = document.querySelectorAll('.cup');
+            const balls = document.querySelectorAll('.ball');
+
+            if (selectedCup === ballPosition) {
+                balls[selectedCup].style.display = 'block';
+                document.getElementById("message").textContent = "Parabéns! Você acertou!";
+                updateBalance(bet * 2);
+            } else {
+                balls[ballPosition].style.display = 'block';
+                document.getElementById("message").textContent = "Você errou! Tente novamente.";
+            }
+        }
+
+        function shuffleCups() {
+            const cups = document.querySelectorAll('.cup');
+            let shuffleCount = 5; // Número de embaralhamentos
+            let interval = setInterval(() => {
+                for (let i = 0; i < cups.length; i++) {
+                    cups[i].style.order = Math.floor(Math.random() * 3);
+                }
+                shuffleCount--;
+                if (shuffleCount === 0) {
+                    clearInterval(interval);
+                    document.getElementById("message").textContent = "Copos embaralhados! Clique em 'Começar o Jogo' para jogar!";
+                }
+            }, 300);
+        }
+    </script>
+</body>
+</html>
